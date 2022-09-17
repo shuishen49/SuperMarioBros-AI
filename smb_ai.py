@@ -12,6 +12,8 @@ import math
 import numpy as np
 import argparse
 import os
+import gzip
+
 
 from utils import SMB, EnemyType, StaticTileType, ColorMap, DynamicTileType
 from config import Config
@@ -166,7 +168,7 @@ class InformationWidget(QtWidgets.QWidget):
         self._init_window()
         # self.grid.setSpacing(20)
         self.setLayout(self.grid)
-
+        
 
     def _init_window(self) -> None:
         info_vbox = QVBoxLayout()
@@ -444,6 +446,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.max_distance = 0  # Track farthest traveled in level
         self.max_fitness = 0.0
         self.env = retro.make(game='SuperMarioBros-Nes', state=f'Level{self.config.Misc.level}')
+        
+        # self.env = retro.make(game='SuperMarioBros-Nes', state='Level1-2')
 
         # Determine the size of the next generation based off selection type
         self._next_gen_size = None
@@ -501,6 +505,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         k = event.key()
+        print(k)
         # m = {
         #     Qt.Key_Right : 7,
         #     Qt.Key_C : 8,
@@ -510,10 +515,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # }
         # if k in m:
         #     self.keys[m[k]] = 1
+        # 按下S键保存当前状态
+        if k == Qt.Key_S:
+            content = self.env.em.get_state()
+            with gzip.open("the_saved_state.state", 'wb') as f:
+                f.write(content)
+            f.close()
+            print("save the state")
         # if k == Qt.Key_D:
         #     tiles = SMB.get_tiles(self.env.get_ram(), False)
         modifier = int(event.modifiers())
         if modifier == Qt.CTRL:
+            k = event.key()
             if k == Qt.Key_V:
                 self._should_display = not self._should_display
 
@@ -709,7 +722,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.mario.set_input_as_array(ram, tiles)
         self.mario.update(ram, tiles, self.keys, self.ouput_to_keys_map)
-        
+        1
         if not args.no_display:
             if self._should_display:
                 self.viz_window.ram = ram

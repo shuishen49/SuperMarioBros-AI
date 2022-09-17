@@ -140,16 +140,17 @@ class Mario(Individual):
             self.x_dist = SMB.get_mario_location_in_level(ram).x
             self.game_score = SMB.get_mario_score(ram)
             # Sliding down flag pole
-            if ram[0x001D] == 3:
-                self.did_win = True
-                if not self._printed and self.debug:
-                    name = 'Mario '
-                    name += f'{self.name}' if self.name else ''
-                    print(f'{name} won')
-                    self._printed = True
-                if not self.allow_additional_time:
-                    self.is_alive = False
-                    return False
+            # if ram[0x001D] == 3:
+            #     # 到达终点
+            #     self.did_win = True
+            #     if not self._printed and self.debug:
+            #         name = 'Mario '
+            #         name += f'{self.name}' if self.name else ''
+            #         print(f'{name} won')
+            #         self._printed = True
+            #     if not self.allow_additional_time:
+            #         self.is_alive = False
+            #         return False
             # If we made it further, reset stats
             if self.x_dist > self.farthest_x:
                 self.farthest_x = self.x_dist
@@ -163,7 +164,7 @@ class Mario(Individual):
             if self.allow_additional_time and self.additional_timesteps > self.max_additional_timesteps:
                 self.is_alive = False
                 return False
-            elif not self.did_win and self._frames_since_progress > 60*3:
+            elif not self.did_win and self._frames_since_progress > 60*30:
                 self.is_alive = False
                 return False            
         else:

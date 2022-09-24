@@ -7,7 +7,7 @@ ports:
     onOpen: open-preview
 tasks:
   - init: pip3 install -r requirements.txt
-    command: python3 smb_ai.py --replay-file "Example world1-1" --replay-inds 1213,1214
+    command: python3 -m retro.import 
 
 # List the ports to expose. Learn more https://www.gitpod.io/docs/config-ports/
 

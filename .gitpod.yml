@@ -8,7 +8,7 @@ ports:
 tasks:
   - init: pip3 install -r requirements.txt
     command: python3 -m retro.import 
-  - init: echo 'setup...'
+  - init: >
     command: sh ./setup.sh &&
     gp sync-done bundle
   - init: gp sync-await bundle

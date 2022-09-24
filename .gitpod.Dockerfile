@@ -15,5 +15,5 @@ RUN sudo apt-get update \
   libxcb-xkb1 -y \
   libxkbcommon-x11-0 \
  && sudo rm -rf /var/lib/apt/lists/* \
- python -m retro.import
+ python3 -m retro.import
     python3 smb_ai.py --load-file "Example world1-1"  --load-inds 1213 \

@@ -11,7 +11,7 @@ import retro
 from stable_baselines3 import PPO
 
 from mario_rl.config import TRAIN_CONFIG
-from mario_rl.wrappers import DiscreteRetroActions
+from mario_rl.wrappers import DiscreteRetroActions, EpisodicLifeRetro
 
 
 def parse_args():
@@ -65,6 +65,7 @@ def main():
 
     env = retro.make(game=TRAIN_CONFIG['game'])
     env = DiscreteRetroActions(env)
+    env = EpisodicLifeRetro(env)
     cv2.namedWindow('Mario Live Demo (best model, color)', cv2.WINDOW_NORMAL)
 
     last_load = 0.0

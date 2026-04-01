@@ -50,6 +50,46 @@ class ResizeObservation(gym.ObservationWrapper):
         return obs.astype(np.uint8)
 
 
+class EpisodicLifeRetro(gym.Wrapper):
+    """Treat life loss as end of episode (do not wait until all lives are gone)."""
+
+    def __init__(self, env):
+        super().__init__(env)
+        self.prev_lives = None
+
+    @staticmethod
+    def _get_lives(info):
+        for k in ('lives', 'life', 'player_lives'):
+            if k in info and info[k] is not None:
+                try:
+                    return int(info[k])
+                except Exception:
+                    pass
+        return None
+
+    def reset(self, **kwargs):
+        obs = self.env.reset(**kwargs)
+        self.prev_lives = None
+        return obs
+
+    def step(self, action):
+        obs, reward, done, info = self.env.step(action)
+
+        lives = self._get_lives(info if isinstance(info, dict) else {})
+        life_lost = False
+        if lives is not None and self.prev_lives is not None and lives < self.prev_lives:
+            life_lost = True
+
+        self.prev_lives = lives if lives is not None else self.prev_lives
+
+        if life_lost and not done:
+            done = True
+            if isinstance(info, dict):
+                info['life_lost_done'] = True
+
+        return obs, reward, done, info
+
+
 class RetroRewardWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)

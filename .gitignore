@@ -4,3 +4,4 @@ __pycache__/
 runs/
 *.png
 *.mp4
+models/

@@ -3,7 +3,7 @@ from __future__ import annotations
 import retro
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from mario_rl.wrappers import DiscreteRetroActions, ResizeObservation, RetroRewardWrapper
+from mario_rl.wrappers import DiscreteRetroActions, EpisodicLifeRetro, ResizeObservation, RetroRewardWrapper
 from mario_rl.utils import ensure_dir
 
 
@@ -24,6 +24,7 @@ def _make_single_env(
 
     env = retro.make(**kwargs)
     env = DiscreteRetroActions(env)
+    env = EpisodicLifeRetro(env)
     env = RetroRewardWrapper(env)
     env = ResizeObservation(env, shape=resize_shape, grayscale=grayscale)
     return env

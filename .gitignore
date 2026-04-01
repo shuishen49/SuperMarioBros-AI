@@ -1,7 +1,6 @@
 __pycache__/
 *.pyc
 .venv/
-models/
 runs/
 *.zip
 *.png

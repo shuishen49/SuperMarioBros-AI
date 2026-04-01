@@ -6,7 +6,7 @@ rem ===== 可改参数（按需改这里） =====
 set MODEL=auto
 set SHOW_EVERY=4
 set RELOAD_SECONDS=2
-set SCALE=4
+set SCALE=1
 set EPISODE_STEPS=4000
 rem ==================================
 

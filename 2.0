@@ -1,0 +1,12 @@
+Collecting shimmy
+  Downloading Shimmy-2.0.0-py3-none-any.whl.metadata (3.5 kB)
+Requirement already satisfied: numpy>=1.18.0 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from shimmy) (1.24.4)
+Requirement already satisfied: gymnasium>=1.0.0a1 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from shimmy) (1.0.0)
+Requirement already satisfied: cloudpickle>=1.2.0 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from gymnasium>=1.0.0a1->shimmy) (3.1.2)
+Requirement already satisfied: typing-extensions>=4.3.0 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from gymnasium>=1.0.0a1->shimmy) (4.13.2)
+Requirement already satisfied: farama-notifications>=0.0.1 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from gymnasium>=1.0.0a1->shimmy) (0.0.4)
+Requirement already satisfied: importlib-metadata>=4.8.0 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from gymnasium>=1.0.0a1->shimmy) (8.5.0)
+Requirement already satisfied: zipp>=3.20 in d:\source_code\mario-yolo-ppo\.venv\lib\site-packages (from importlib-metadata>=4.8.0->gymnasium>=1.0.0a1->shimmy) (3.20.2)
+Downloading Shimmy-2.0.0-py3-none-any.whl (30 kB)
+Installing collected packages: shimmy
+Successfully installed shimmy-2.0.0

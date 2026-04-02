@@ -56,7 +56,7 @@ def resolve_model_path(model_arg: str):
     if latest_ckpt:
         return latest_ckpt
 
-    fallback = os.path.join('models', 'ppo_mario_retro.zip')
+    fallback = os.path.join('models', 'best', 'ppo_mario_retro.zip')
     return fallback if os.path.exists(fallback) else None
 
 

@@ -85,7 +85,7 @@ Write-Host 'Do not enable render during training.' -ForegroundColor Yellow
 if ($LASTEXITCODE -eq 0) {
     Write-Host ''
     Write-Host 'Training finished. Run this to play:' -ForegroundColor Green
-    Write-Host '.\.venv\Scripts\python.exe .\play.py --model models\ppo_mario_retro.zip --render' -ForegroundColor Yellow
+    Write-Host '.\.venv\Scripts\python.exe .\play.py --model models\best\ppo_mario_retro.zip --render' -ForegroundColor Yellow
 } else {
     Write-Host 'Training failed or was interrupted.' -ForegroundColor Red
     exit $LASTEXITCODE

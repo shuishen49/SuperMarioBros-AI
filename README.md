@@ -82,7 +82,7 @@ python train_ppo.py
 默认会：
 
 - 使用 `SuperMarioBros-Nes`
-- 自动保存模型到 `models/ppo_mario_retro`
+- 自动保存模型到 `models/best/ppo_mario_retro`
 - TensorBoard 日志到 `runs/`
 
 ---
@@ -90,7 +90,7 @@ python train_ppo.py
 ## 4. 运行训练好的模型
 
 ```powershell
-python play.py --model models/ppo_mario_retro.zip --render
+python play.py --model models/best/ppo_mario_retro.zip --render
 ```
 
 ---

@@ -2,9 +2,9 @@
 cd /d %~dp0
 
 set MODEL=models\best\ppo_mario_ram.zip
-set TIMESTEPS=200000
-set SAVE_FREQ=1000
-set LR=0.00025
+set TIMESTEPS=10000000
+set SAVE_FREQ=100000
+set LR=0.0001
 
 set RENDER_ARGS=
 if /I "%~1"=="--render" set RENDER_ARGS=--render --render-every 4

@@ -8,6 +8,7 @@ from mario_rl.callbacks import make_callbacks
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback, CallbackList
+from stable_baselines3.common.utils import get_schedule_fn
 from stable_baselines3.common.vec_env import VecFrameStack, VecMonitor
 
 
@@ -53,6 +54,8 @@ def parse_args():
     parser.add_argument('--timesteps', type=int, default=None, help='Override total timesteps')
     parser.add_argument('--resume', type=str, default=None, help='Path to existing PPO model zip to continue training')
     parser.add_argument('--device', type=str, default=None, help='Override device, e.g. cpu/cuda/auto')
+    parser.add_argument('--save-freq', type=int, default=None, help='Override checkpoint save frequency (steps)')
+    parser.add_argument('--lr', type=float, default=None, help='Override learning rate, e.g. 1e-4')
     return parser.parse_args()
 
 
@@ -72,16 +75,20 @@ def main() -> None:
     env = VecFrameStack(env, n_stack=TRAIN_CONFIG['frame_stack'])
 
     device = args.device if args.device is not None else TRAIN_CONFIG['device']
+    learning_rate = args.lr if args.lr is not None else TRAIN_CONFIG['learning_rate']
 
     if args.resume and os.path.exists(args.resume):
         model = PPO.load(args.resume, env=env, device=device)
         print(f'Resuming training from: {args.resume}')
+        # Ensure lr override also applies when resuming from checkpoint.
+        model.learning_rate = learning_rate
+        model.lr_schedule = get_schedule_fn(learning_rate)
         reset_num_timesteps = False
     else:
         model = PPO(
             policy='CnnPolicy',
             env=env,
-            learning_rate=TRAIN_CONFIG['learning_rate'],
+            learning_rate=learning_rate,
             n_steps=TRAIN_CONFIG['n_steps'],
             batch_size=TRAIN_CONFIG['batch_size'],
             n_epochs=TRAIN_CONFIG['n_epochs'],
@@ -96,10 +103,13 @@ def main() -> None:
         )
         reset_num_timesteps = True
 
+    print(f'Using learning_rate={learning_rate}')
+
     # Save once before learning so live demo has something to load immediately
     model.save(TRAIN_CONFIG['save_path'])
 
-    base_callbacks = make_callbacks(TRAIN_CONFIG['save_path'], TRAIN_CONFIG['save_freq'])
+    save_freq = args.save_freq if args.save_freq is not None else TRAIN_CONFIG['save_freq']
+    base_callbacks = make_callbacks(TRAIN_CONFIG['save_path'], save_freq)
     callback_items = [base_callbacks]
     if args.render:
         callback_items.append(RenderCallback(every_steps=args.render_every))

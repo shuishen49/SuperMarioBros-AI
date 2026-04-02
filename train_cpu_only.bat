@@ -6,7 +6,7 @@ set LOG_DIR=logs
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 set LOG_FILE=%LOG_DIR%\train_cpu_%TS%.log
 
-set MODEL=models\ppo_mario_retro.zip
+set MODEL=models\best\ppo_mario_ram.zip
 set TIMESTEPS=200000
 set SAVE_FREQ=1000
 set LR=0.00025

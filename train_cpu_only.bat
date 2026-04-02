@@ -1,37 +1,41 @@
 @echo off
 cd /d %~dp0
 
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set TS=%%i
-set LOG_DIR=logs
-if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
-set LOG_FILE=%LOG_DIR%\train_cpu_%TS%.log
-
 set MODEL=models\best\ppo_mario_ram.zip
 set TIMESTEPS=200000
 set SAVE_FREQ=1000
 set LR=0.00025
 
+set RENDER_ARGS=
+if /I "%~1"=="--render" set RENDER_ARGS=--render --render-every 4
+if /I "%~1"=="--render-fast" set RENDER_ARGS=--render --render-every 1
+
 set PY_EXE=%~dp0.venv\Scripts\python.exe
 if not exist "%PY_EXE%" set PY_EXE=python
 
 echo [TRAIN] CPU mode + save every %SAVE_FREQ% steps + lr=%LR%
-echo [TRAIN] Python: %PY_EXE%
-echo [TRAIN] Log file: %LOG_FILE%
-echo [TRAIN] Params: device=cpu timesteps=%TIMESTEPS% save_freq=%SAVE_FREQ% lr=%LR% > "%LOG_FILE%"
+echo [TRAIN] Live console mode (progress/timesteps visible)
+echo [TRAIN] Model path: %MODEL%
+if defined RENDER_ARGS (
+  echo [TRAIN] Preview window: ON  (%RENDER_ARGS%)
+) else (
+  echo [TRAIN] Preview window: OFF (faster)
+)
+echo [TRAIN] Usage: train_cpu_only.bat [--render^|--render-fast]
 
 if exist "%MODEL%" (
   echo [TRAIN] Resuming from %MODEL%
-  "%PY_EXE%" "%~dp0train_ppo.py" --timesteps %TIMESTEPS% --device cpu --save-freq %SAVE_FREQ% --lr %LR% --resume "%MODEL%" 1>>"%LOG_FILE%" 2>&1
+  "%PY_EXE%" "%~dp0train_ppo.py" --timesteps %TIMESTEPS% --device cpu --save-freq %SAVE_FREQ% --lr %LR% %RENDER_ARGS% --resume "%MODEL%"
 ) else (
   echo [TRAIN] No resume model found, start from scratch.
-  "%PY_EXE%" "%~dp0train_ppo.py" --timesteps %TIMESTEPS% --device cpu --save-freq %SAVE_FREQ% --lr %LR% 1>>"%LOG_FILE%" 2>&1
+  "%PY_EXE%" "%~dp0train_ppo.py" --timesteps %TIMESTEPS% --device cpu --save-freq %SAVE_FREQ% --lr %LR% %RENDER_ARGS%
 )
 
 if errorlevel 1 (
-  echo [TRAIN] Failed with exit code %errorlevel%. See log: %LOG_FILE%
+  echo [TRAIN] Failed with exit code %errorlevel%.
   pause
   exit /b %errorlevel%
 )
 
-echo [TRAIN] Finished. Check log: %LOG_FILE%
+echo [TRAIN] Finished.
 pause

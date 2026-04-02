@@ -5,3 +5,4 @@ runs/
 *.png
 *.mp4
 models/
+logs/

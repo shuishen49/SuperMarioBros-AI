@@ -105,6 +105,10 @@ def main() -> None:
 
     print(f'Using learning_rate={learning_rate}')
 
+    save_dir = os.path.dirname(TRAIN_CONFIG['save_path'])
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+
     # Save once before learning so live demo has something to load immediately
     model.save(TRAIN_CONFIG['save_path'])
 

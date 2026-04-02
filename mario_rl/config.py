@@ -17,7 +17,7 @@ TRAIN_CONFIG = {
     'vf_coef': 0.5,
     'total_timesteps': 200_000,
     'save_freq': 1_000,
-    'save_path': 'models/ppo_mario_retro',
+    'save_path': 'models/best/ppo_mario_retro',
     'tensorboard_log': 'runs/',
     'device': 'auto',
 }

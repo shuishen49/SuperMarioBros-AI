@@ -4,5 +4,8 @@ __pycache__/
 runs/
 *.png
 *.mp4
-models/
+models/*
+!models/best/
+models/best/*
+!models/best/ppo_mario_retro.zip
 logs/

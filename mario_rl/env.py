@@ -3,7 +3,13 @@ from __future__ import annotations
 import retro
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from mario_rl.wrappers import DiscreteRetroActions, EpisodicLifeRetro, ResizeObservation, RetroRewardWrapper
+from mario_rl.wrappers import (
+    DiscreteRetroActions,
+    EpisodicLifeRetro,
+    RamGridObservation,
+    ResizeObservation,
+    RetroRewardWrapper,
+)
 from mario_rl.utils import ensure_dir
 
 
@@ -14,6 +20,7 @@ def _make_single_env(
     frame_skip: int = 4,
     grayscale: bool = True,
     resize_shape=(84, 84),
+    obs_mode: str = 'image',
     render_mode=None,
 ):
     kwargs = {'game': game}
@@ -26,7 +33,12 @@ def _make_single_env(
     env = DiscreteRetroActions(env)
     env = EpisodicLifeRetro(env)
     env = RetroRewardWrapper(env)
-    env = ResizeObservation(env, shape=resize_shape, grayscale=grayscale)
+
+    mode = (obs_mode or 'image').lower()
+    if mode == 'ram':
+        env = RamGridObservation(env)
+    else:
+        env = ResizeObservation(env, shape=resize_shape, grayscale=grayscale)
     return env
 
 
@@ -44,6 +56,7 @@ def make_eval_env(render_mode=None, **kwargs):
         'frame_skip': 4,
         'grayscale': True,
         'resize_shape': (84, 84),
+        'obs_mode': 'image',
         'render_mode': render_mode,
     }
     defaults.update(kwargs)

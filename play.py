@@ -20,9 +20,12 @@ def main():
         game=TRAIN_CONFIG['game'],
         state=TRAIN_CONFIG['state'],
         scenario=TRAIN_CONFIG['scenario'],
+        obs_mode=TRAIN_CONFIG.get('obs_mode', 'image'),
         render_mode='human' if args.render else None,
     )
-    env = VecFrameStack(env, n_stack=TRAIN_CONFIG['frame_stack'])
+    n_stack = int(TRAIN_CONFIG.get('frame_stack', 1))
+    if n_stack > 1:
+        env = VecFrameStack(env, n_stack=n_stack)
 
     model = PPO.load(args.model)
 

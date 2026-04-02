@@ -1,6 +1,7 @@
 import argparse
 import os
 import cv2
+import numpy as np
 
 from mario_rl.config import TRAIN_CONFIG
 from mario_rl.env import make_train_env
@@ -20,23 +21,59 @@ class RenderCallback(BaseCallback):
         cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
 
     def _on_step(self) -> bool:
-        if self.n_calls % self.every_steps != 0:
-            return True
-
         try:
-            images = self.training_env.get_images()
-            if images and images[0] is not None:
-                frame = images[0]
-                if frame.ndim == 2:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-                elif frame.ndim == 3 and frame.shape[-1] == 1:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-                else:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-                cv2.imshow(self.win_name, frame)
+            # Keep window responsive even when skipping draw.
+            if self.n_calls % self.every_steps != 0:
                 cv2.waitKey(1)
+                return True
+
+            frame = None
+
+            # Prefer direct training observation (works for both image and RAM modes).
+            new_obs = self.locals.get('new_obs', None)
+            if new_obs is not None:
+                arr = np.asarray(new_obs)
+                if arr.ndim >= 4:
+                    frame = arr[0]
+                elif arr.ndim == 3:
+                    frame = arr
+
+            # Fallback to environment-rendered images.
+            if frame is None:
+                images = self.training_env.get_images()
+                if images and images[0] is not None:
+                    frame = images[0]
+
+            if frame is None:
+                cv2.waitKey(1)
+                return True
+
+            # RAM mode (possibly frame-stacked): small HxW with channels as temporal stack.
+            if frame.ndim == 3 and frame.shape[0] <= 32 and frame.shape[1] <= 32:
+                if frame.shape[-1] >= 1:
+                    grid = frame[..., -1].astype(np.float32)  # use latest stacked frame
+                else:
+                    grid = frame.astype(np.float32)
+
+                vis = np.zeros((grid.shape[0], grid.shape[1], 3), dtype=np.uint8)
+                vis[grid <= -0.5] = (0, 0, 255)                      # enemy: red
+                vis[(grid > -0.5) & (grid < 0.5)] = (20, 20, 20)     # empty: dark
+                vis[(grid >= 0.5) & (grid < 1.5)] = (200, 200, 200)  # tile: gray
+                vis[grid >= 1.5] = (0, 255, 0)                       # mario: green
+                scale = 24
+                frame_bgr = cv2.resize(vis, (vis.shape[1] * scale, vis.shape[0] * scale), interpolation=cv2.INTER_NEAREST)
+                cv2.putText(frame_bgr, 'RAM Grid (-1 enemy, 0 empty, 1 tile, 2 mario)', (8, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+            elif frame.ndim == 2:
+                frame_bgr = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_GRAY2BGR)
+            elif frame.ndim == 3 and frame.shape[-1] == 1:
+                frame_bgr = cv2.cvtColor(frame[..., 0].astype(np.uint8), cv2.COLOR_GRAY2BGR)
+            else:
+                frame_bgr = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_RGB2BGR)
+
+            cv2.imshow(self.win_name, frame_bgr)
+            cv2.waitKey(1)
         except Exception:
+            # Never block training on preview rendering.
             pass
         return True
 
@@ -69,10 +106,13 @@ def main() -> None:
         frame_skip=TRAIN_CONFIG['frame_skip'],
         grayscale=TRAIN_CONFIG['grayscale'],
         resize_shape=TRAIN_CONFIG['resize_shape'],
+        obs_mode=TRAIN_CONFIG.get('obs_mode', 'image'),
     )
 
     env = VecMonitor(env)
-    env = VecFrameStack(env, n_stack=TRAIN_CONFIG['frame_stack'])
+    n_stack = int(TRAIN_CONFIG.get('frame_stack', 1))
+    if n_stack > 1:
+        env = VecFrameStack(env, n_stack=n_stack)
 
     device = args.device if args.device is not None else TRAIN_CONFIG['device']
     learning_rate = args.lr if args.lr is not None else TRAIN_CONFIG['learning_rate']
@@ -86,7 +126,7 @@ def main() -> None:
         reset_num_timesteps = False
     else:
         model = PPO(
-            policy='CnnPolicy',
+            policy=TRAIN_CONFIG.get('policy', 'CnnPolicy'),
             env=env,
             learning_rate=learning_rate,
             n_steps=TRAIN_CONFIG['n_steps'],

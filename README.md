@@ -13,6 +13,30 @@ A improved supermario game based on https://github.com/justinmeister/Mario-Level
 # How To Start Game
 $ python main.py
 
+# AI Training (PPO, multi-Mario parallel)
+## Install AI dependencies
+```bash
+python -m pip install -r requirements-ai.txt
+```
+
+## Train with multiple parallel environments
+```bash
+python -m ai.train_ppo --n-envs 8 --total-timesteps 1000000 --level 1
+```
+
+## Watch trained model play
+```bash
+python -m ai.play_ppo --model checkpoints/ppo_mario_final.zip --episodes 5
+```
+
+Notes:
+- `--n-envs` controls how many Marios train in parallel (PPO VecEnv).
+- Increase `--n-envs` and `--total-timesteps` for better performance.
+- Use TensorBoard:
+```bash
+tensorboard --logdir logs
+```
+
 # How to Play
 * use LEFT/RIGHT/DOWN key to control player
 * use key 'a' to jump

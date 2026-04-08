@@ -1,0 +1,6 @@
+gymnasium==0.29.1
+stable-baselines3==2.3.2
+tensorboard>=2.16
+rich>=13.7
+pygame==2.6.1
+numpy>=1.26
